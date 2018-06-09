@@ -120,7 +120,7 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	/**
 	 * 个人比较喜欢用int来区分
 	 */
-	protected int mToken;
+	protected String mToken;
 	/**
 	 * 缓存的有效期 在缓存生效的情况下,服务器未设置缓存时长时起效
 	 */
@@ -136,11 +136,11 @@ public abstract class Request<T> implements Comparable<Request<T>> {
 	 */
 	public final static int NEV_EXPIRED = -1;
 
-	public void setToken(int token) {
+	public void setToken(String token) {
 		mToken = token;
 	}
 
-	public int getToken() {
+	public String getToken() {
 		return mToken;
 	}
 

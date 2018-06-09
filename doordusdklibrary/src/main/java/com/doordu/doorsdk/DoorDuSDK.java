@@ -1,20 +1,22 @@
 package com.doordu.doorsdk;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response.ErrorListener;
 import com.android.volley.Response.Listener;
 import com.android.volley.error.VolleyError;
 import com.android.volley.toolbox.Volley;
 import com.android.volley.toolbox.VolleyBuilder;
+import com.doordu.doorsdk.bean.AccessToken;
+import com.doordu.doorsdk.bean.BaseResponse;
 import com.doordu.doorsdk.common.DeviceInformation;
 import com.doordu.doorsdk.common.NetworkState;
+import com.doordu.doorsdk.common.TokenPrefer;
 import com.doordu.doorsdk.listener.InstructionListener;
-import com.doordu.doorsdk.listener.OpenDoorListener;
-import com.doordu.doorsdk.listener.RegisterListener;
-import com.doordu.doorsdk.listener.RegisterResponseListener;
 import com.doordu.doorsdk.listener.ResponseListener;
 import com.doordu.doorsdk.net.NetworkHelp;
 import com.doordu.doorsdk.netbean.BaseGsonClass;
@@ -22,6 +24,9 @@ import com.doordu.doorsdk.netbean.CardInfo;
 import com.doordu.doorsdk.netbean.DoorConfig;
 import com.doordu.doorsdk.netbean.DoorConfig2;
 import com.doordu.doorsdk.netbean.Floor;
+import com.doordu.doorsdk.netbean.NetConfig;
+import com.doordu.doorsdk.netbean.ResultBean;
+import com.doordu.doorsdk.netbean.UpdoorconfigBean;
 
 import java.util.List;
 
@@ -37,10 +42,22 @@ import java.util.List;
 
 public class DoorDuSDK {
     private final static int TOKEN_REGISTER = 1;
-    private final static int TOKEN_GET_CONFIG = 2;
+    //private final static int TOKEN_GET_CONFIG = 2;
     private static NetworkState mNetworkState;
     private static RequestQueue mNetWorkRequest;
     private static InstructionListener mInstructionListener;
+    private static Context mContext;
+    private static AccessToken accessToken;
+
+    public static RequestQueue addRequestQueue(Request request) {
+        if (mNetWorkRequest == null) {
+            VolleyBuilder b = new VolleyBuilder(mContext);
+            b.setThreadPoolSize(3);
+            mNetWorkRequest = Volley.newRequestQueue(b);
+        }
+        mNetWorkRequest.add(request);
+        return mNetWorkRequest;
+    }
 
     /**
      * 先写到一块儿，等会儿要分开
@@ -50,69 +67,72 @@ public class DoorDuSDK {
      * @param deviceID    设备id
      * @param listener    回调监听
      */
-    public static void init(Application application, String app_id, String secret_key, String deviceID, InstructionListener listener) {
+    public static void init(final Application application, String app_id, String secret_key, final String deviceID, String domainName, int port, final InstructionListener listener) {
+        mContext = application;
         mInstructionListener = listener;
         VolleyBuilder b = new VolleyBuilder(application);
         b.setThreadPoolSize(3);
         mNetWorkRequest = Volley.newRequestQueue(b);
         mNetworkState = new NetworkState(application);
-
+        TokenPrefer.loadConfig(application, accessToken);
         DeviceInformation.getInstance().setGuid(deviceID);
-        NetworkHelp.getRegisterDevice(mNetWorkRequest, "15018500000", "", "", application, new Listener<BaseGsonClass<DoorConfig>>() {
+        NetConfig netConfig = new NetConfig();
+        netConfig.setdPort(port);
+        netConfig.setDomain(domainName);
+        NetworkHelp.getAccessToken(app_id, secret_key, new Listener<BaseResponse<AccessToken>>() {
             @Override
-            public void onResponse(BaseGsonClass<DoorConfig> response, int token) {
+            public void onResponse(BaseResponse<AccessToken> response, int token) {
+                accessToken = response.data;
+                TokenPrefer.saveConfig(mContext, accessToken);
+                RegisterDevice(application);
+
                 Log.i("EEE", "init  response==" + response);
                 if (response.isSuccess()) {
-                    getconfigure();
+                    getConfig(deviceID, null);
+                } else {
+                    if (mInstructionListener != null) {
+                        mInstructionListener.noBinding();
+                    }
                 }
+
             }
         }, new ErrorListener() {
             @Override
-            public void onErrorResponse(VolleyError error, int token) {
+            public void onErrorResponse(VolleyError error, String token) {
+                mInstructionListener.tokenFile();
+                mNetWorkRequest = null;
+                mContext = null;
+                mNetWorkRequest.stop();
+            }
+        });
+
+
+    }
+
+    /**
+     * 设备注册检查
+     */
+    private static void RegisterDevice(Application application) {
+        NetworkHelp.getRegisterDevice(mNetWorkRequest, "15018500000", "", "", application, new Listener<BaseGsonClass<DoorConfig>>() {
+            @Override
+            public void onResponse(BaseGsonClass<DoorConfig> response, int token) {
+
+            }
+        }, new ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error, String token) {
                 Log.i("EEE", "init error==" + error);
             }
-        }, TOKEN_REGISTER);
+        }, accessToken.getToken());
     }
 
-    /**
-     * 检查注册
-     */
-    public static void checkRegister(final String deviceID) {
-        NetworkHelp.checkRegister(new RegisterListener() {
-            @Override
-            public void alreadyRegistered() {//已经注册
-
-            }
-
-            @Override
-            public void unregistered() {//尚未注册
-                equipmentRegistration(deviceID);
-            }
-        });
-    }
 
     /**
-     * 注册设备
+     * @param guid     设备唯一标识符
+     * @param door_ver 5000 以下代表 door5 以下版本，5000-5999 代表 door5 版本，默认值：0
      */
-    public static void equipmentRegistration(String deviceID) {
-        NetworkHelp.equipmentRegistration(new RegisterResponseListener() {
-            @Override
-            public void responseSuccess() {
-
-            }
-
-            @Override
-            public void responseFail() {
-
-            }
-        });
-    }
-
-    /**
-     * 拉取配置信息
-     */
-    public static void getconfigure() {
-        NetworkHelp.getConfig(mNetWorkRequest, new Listener<BaseGsonClass<DoorConfig2>>() {
+    public static void getConfig(String guid, String door_ver) {
+        NetworkHelp.getConfig(DeviceInformation.getInstance().getGuid(), "0", new Listener<BaseGsonClass<DoorConfig2>>() {
                     @Override
                     public void onResponse(BaseGsonClass<DoorConfig2> response, int token) {
                         Log.i("EEE", "getConfig  response==" + response);
@@ -124,10 +144,21 @@ public class DoorDuSDK {
                 },
                 new ErrorListener() {
                     @Override
-                    public void onErrorResponse(VolleyError error, int token) {
+                    public void onErrorResponse(VolleyError error, String token) {
                         Log.i("EEE", "getConfig error==" + error);
                     }
-                }, TOKEN_GET_CONFIG);
+                }, accessToken.getToken());
+
+    }
+
+
+    /**
+     * 上报配置信息
+     *
+     * @param guid   设备唯一标识符
+     * @param config json对象	配置内容
+     */
+    public static void postDeviceConfig(String guid, UpdoorconfigBean config) {
 
     }
 
@@ -150,54 +181,37 @@ public class DoorDuSDK {
     }
 
     /**
-     * 拉取黑白名单
+     * 拉取黑白名单,数据会分页拉取，约定每次最大返回500条，如果每次返回值是500则再拉取一次
      *
      * @param
-     * @param door_guid
-     * @param curid
+     * @param guid     设备唯一标识符
+     * @param curid    当前操作步数
      * @param listener
      */
-    public static List<CardInfo<Floor>> getCardInfo(String door_guid, int curid, ResponseListener<BaseGsonClass<CardInfo<Floor>>> listener) {
+    public static List<CardInfo<Floor>> getCardInfo(String guid, int curid, ResponseListener<BaseGsonClass<CardInfo<Floor>>> listener) {
         return null;
     }
 
+
     /**
-     * 上报配置信息
+     * 上传访客留影
      *
-     * @param size_wxh 显示屏分辨率	1920x1032 屏幕宽 x 高
-     * @param modeType 设备类型
-     * @param netType  网络类型
-     */
-    public static void postDeviceConfig(String size_wxh, String modeType, String netType) {
-
-    }
-
-    /**
-     * 获取配置信息
-     *
-     * @param app
-     * @param listener
-     */
-    public static void getConfig(Application app, ResponseListener<BaseGsonClass<DoorConfig2>> listener) {
-
-
-    }
-
-    /**
-     * @param fileType     文件类型 Constant.VIDEO_TYPE Constant.PICTURE_TYPE，
-     * @param door_guid    门禁机 GUID
-     * @param device_guid  开门设备 GUID
-     * @param device_type  必选，设备类型，枚举值
-     * @param operate_type 必选，操作类型
-     * @param video_time   必选，视频时间
-     * @param inside       必选，开门内外的区别
-     * @param objectkey    文件名称
-     * @param room_id      必选，房号
-     * @param box          必选，86 盒子
+     * @param fileType     必选 文件类型 Constant.VIDEO_TYPE Constant.PICTURE_TYPE，
+     * @param fileName     必选 文件名称
      * @param fileAddress  必选  文件地址
-     * @return 上传访客的视频和拍照文件
+     * @param guid         必选 设备唯一标识符
+     * @param device_type  必选  设备类型
+     * @param operate_type 必选 开门类型
+     * @param objectkey    必选 留影图片地址
+     * @param time         必选 门禁机时间
+     * @param content      可选 透传字段，具体依据 operate_type 而定，值为urlencode后的字符串
+     * @param room_id      可选 房间 ID
+     * @param reason       可选 摄像头故障状态码
+     * @param open_time    可选 13 位 Unix 时间戳，精确到毫秒级，一次开门的视频留影和图片留影应用同一个时间
+     * @return 上传成功返回true，失败返回false 请重传一次
      */
-    public static boolean uploadVideoOrPicture(String fileType, String door_guid, String device_guid, int device_type, int operate_type, long video_time, int inside, String objectkey, String room_id, String box, String fileAddress) {
+    public static boolean uploadVideoOrPicture(String fileType, String fileName, String fileAddress, String guid, String device_type, int operate_type, String objectkey, long time,
+                                               String content, String room_id, String reason, long open_time) {
 
 
         return false;
@@ -220,10 +234,10 @@ public class DoorDuSDK {
      * 密码开门
      *
      * @param password 开门密码
-     * @param listener 开门状态回调
+     * @param //       开门状态回调
      */
-    public static void pWOpenDoor(int password, OpenDoorListener listener) {
-
+    public static ResultBean pWOpenDoor(int password/*, OpenDoorListener listener*/) {
+        return new ResultBean();
     }
 
 }

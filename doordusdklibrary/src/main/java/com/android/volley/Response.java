@@ -37,7 +37,7 @@ public class Response<T> {
          * Callback method that an error has been occurred with the
          * provided error code and optional user-readable message.
          */
-        public void onErrorResponse(VolleyError error, int token);
+        public void onErrorResponse(VolleyError error, String token);
     }
     
 

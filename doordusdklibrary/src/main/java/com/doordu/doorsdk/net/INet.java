@@ -167,8 +167,6 @@ public class INet extends Thread {
     private void write(SelectionKey key) {
         Request r = null;
         try {
-            // while(!mQueue.isEmpty())
-            // {
             r = mQueue.take();
             if (null != r) {
                 SocketChannel channel = (SocketChannel) key.channel();

@@ -13,17 +13,9 @@ import com.doordu.doorsdk.common.DeviceInformation;
  */
 
 public class NetConfig {
-    // public static String ip = "183.62.71.29"; //测试服务器的IP
     private String ip = "10.0.0.243";                                      // 测试服务器的IP
-    // public static String ip = "58.61.160.225"; //服务器的IP
-    // public static String domain = "183.62.71.29"; //服务器的IP
-    private String domain = "10.0.0.243";                                      // 服务器的IP
-    // public static String domain = "config2.doordu.com"; //服务器的IP
-    // public static String httpUrl =
-    // "http://"+domain+":8080/doordu-beta/api/index.php"; //测试服务器通信的url
+    private String domain = "10.0.0.243";
     private String httpUrl = "https://" + domain + "/doordu-beta/api/index.php"; // 测试服务器通信的url
-    // public static String httpUrl = "http://"+domain+"/doordu/api/index.php";
-    // //与服务器通信的url
     private int dPort = 9501;                                              // 门口端端口
     private int mMode;
 
@@ -89,11 +81,6 @@ public class NetConfig {
      */
     public static NetConfig getTestAddress() {
         NetConfig c = new NetConfig();
-        c.ip = "113.105.114.165";
-        c.domain = "beta.swoole.doordu.com";
-        c.httpUrl = "https://10.0.0.66/doordu-alpha/api/index.php";// doordu-beta
-        c.dPort = 9501;
-        c.mMode = 2;
         return c;
     }
 
@@ -104,11 +91,6 @@ public class NetConfig {
      */
     public static NetConfig getInnerTestAddress() {
         NetConfig c = new NetConfig();
-        c.ip = "10.0.0.72";
-        c.domain = "test.swoole.doordu.com";
-        c.httpUrl = "https://ssl.test.doordu.com/doordu-alpha/api/index.php";
-        c.dPort = 9501;
-        c.mMode = 1;
         return c;
     }
 
@@ -118,18 +100,8 @@ public class NetConfig {
      * @return
      */
     public static NetConfig getAddress() {
-       /* NetConfig c = new NetConfig();
-        c.ip = "58.61.160.225";
-        // FIXME next 下个版本修改为 swheart
-        c.domain = "swheart.doordu.com";// "config2.doordu.com"; // swheart.doordu.com
-        c.httpUrl = "https://door.api.doordu.com/api/index.php";// https://ssl.api.doordu.com/doordu-alpha
-        c.dPort = 9501;*/
         NetConfig c = new NetConfig();
-        c.ip = "10.0.0.72";
-        c.domain = "test.swoole.doordu.com";
-        c.httpUrl = "https://ssl.test.doordu.com/doordu-alpha/api/index.php";
-        c.dPort = 9501;
-        c.mMode = 1;
+
         return c;
     }
 }

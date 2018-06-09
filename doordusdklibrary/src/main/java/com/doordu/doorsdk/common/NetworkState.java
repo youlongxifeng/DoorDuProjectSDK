@@ -1,7 +1,10 @@
 package com.doordu.doorsdk.common;
 
 import android.app.Application;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.SystemClock;
 import android.util.Log;
 
@@ -54,12 +57,33 @@ public class NetworkState implements Runnable{
         time = SystemClock.elapsedRealtime();
         checkTcp();
     }
+
+
+
+
+    public static boolean connection(Context context) {
+        try {
+            ConnectivityManager manager = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo networkInfo = manager.getActiveNetworkInfo();
+            if(networkInfo != null && networkInfo.isConnected()) {
+                return true;
+            }
+        } catch (Exception var3) {
+            var3.printStackTrace();
+        }
+
+        return false;
+    }
+
+
+
     /**
      * 检测tcp状态
      */
     private void checkTcp() {
         // tcp 写入或者收入实际超过2分半钟,则重启tcp
         if ((time - WriteTime) > 150000 || (time - HertReceiver) > 150000) {
+            mConntect=connection(mContext);
             if (mConntect) {
                 Intent intent = new Intent(mContext, MainService.class);
                 intent.putExtra("data", true);
@@ -70,6 +94,7 @@ public class NetworkState implements Runnable{
             Log.i("TAG","time=="+time);
         }
     }
+
 
     /**
      * 释放资源

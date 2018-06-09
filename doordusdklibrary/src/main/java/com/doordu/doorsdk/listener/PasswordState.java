@@ -10,7 +10,7 @@ package com.doordu.doorsdk.listener;
  * @class describe
  */
 
-public enum PasswordState {
+public enum PasswordState {//失败，成功，密码超时
      FAILURE(0),SUCCESS(1), TIMEOUT(2);
 
     private int value;
