@@ -49,7 +49,7 @@ public class DownLoadFile extends Request<String> implements ErrorListener {
 	}
 
 	@Override
-	public void onErrorResponse(VolleyError error, int token) {
+	public void onErrorResponse(VolleyError error, String token) {
 		if (null != mListener)
 			mListener.onResponse("", token);
 	}

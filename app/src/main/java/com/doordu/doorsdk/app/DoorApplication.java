@@ -3,15 +3,15 @@ package com.doordu.doorsdk.app;
 
 import android.app.Application;
 
-import com.doordu.doorsdk.DoorDuSDK;
-import com.doordu.doorsdk.listener.InstructionListener;
-import com.doordu.doorsdk.listener.OpenDoorListener;
-import com.doordu.doorsdk.netbean.CardInfo;
-import com.doordu.doorsdk.netbean.DoorConfig;
-import com.doordu.doorsdk.netbean.Floor;
-import com.doordu.doorsdk.netbean.RandomPwd;
-import com.doordu.doorsdk.netbean.ResultBean;
-import com.doordu.doorsdk.netbean.UpdoorconfigBean;
+import com.dd.sdk.DDSDK;
+import com.dd.sdk.listener.InstructionListener;
+import com.dd.sdk.listener.OpenDoorListener;
+import com.dd.sdk.netbean.CardInfo;
+import com.dd.sdk.netbean.DoorConfig;
+import com.dd.sdk.netbean.Floor;
+import com.dd.sdk.netbean.RandomPwd;
+import com.dd.sdk.netbean.ResultBean;
+import com.dd.sdk.netbean.UpdoorconfigBean;
 
 import java.util.List;
 
@@ -29,7 +29,7 @@ public class DoorApplication extends Application implements InstructionListener 
     @Override
     public void onCreate() {
         super.onCreate();
-        DoorDuSDK.init(this, "BOX_GZ_00001", "1b39ab32553f82ea03aa3b5e23af85c8", "DDD4001708-05946", "test.swoole.doordu.com", 9501, this);
+        DDSDK.init(this, "BOX_GZ_00001", "1b39ab32553f82ea03aa3b5e23af85c8", "DDD4001708-05946", "test.swoole.doordu.com", 9501, this);
     }
 
     /**
@@ -49,7 +49,7 @@ public class DoorApplication extends Application implements InstructionListener 
     @Override
     public ResultBean getconfig(DoorConfig doorConfig) {
         //上报配置内容
-        DoorDuSDK.postDeviceConfig("guid", new UpdoorconfigBean());
+        DDSDK.postDeviceConfig("guid", new UpdoorconfigBean());
         return new ResultBean();
     }
     /**
@@ -101,7 +101,7 @@ public class DoorApplication extends Application implements InstructionListener 
 
 
         //开门操作完成后需要上报访客留影记录,上传成功返回true，失败返回false 请重传一次
-        boolean isUpload = DoorDuSDK.uploadVideoOrPicture(fileType, fileName, fileAddress, guid, device_type, operate_type, objectkey, time, content, room_id, reason, open_time);
+        boolean isUpload = DDSDK.uploadVideoOrPicture(fileType, fileName, fileAddress, guid, device_type, operate_type, objectkey, time, content, room_id, reason, open_time);
         return new ResultBean();
     }
 
@@ -132,7 +132,7 @@ public class DoorApplication extends Application implements InstructionListener 
 
     @Override
     public ResultBean tokenFile() {//重新获取token信息
-        DoorDuSDK.init(this, "", "", "DDD4001708-05946", "test.swoole.doordu.com", 9501, this);
+        DDSDK.init(this, "", "", "DDD4001708-05946", "test.swoole.doordu.com", 9501, this);
         return new ResultBean();
     }
 
@@ -140,7 +140,7 @@ public class DoorApplication extends Application implements InstructionListener 
      * 手动输入开门密码 从数据库中对比当前密码，如果存在并且密码没有有过期就开门
      */
     public void setTemppassword(int password) {
-        DoorDuSDK.pWOpenDoor(password );//上报当前密码，判断当前密码是否过期，在后台做过期对比。
+        DDSDK.pWOpenDoor(password );//上报当前密码，判断当前密码是否过期，在后台做过期对比。
         //return PasswordState.getPasswordState(PasswordState.SUCCESS);
     }
 

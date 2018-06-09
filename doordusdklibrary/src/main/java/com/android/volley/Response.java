@@ -28,7 +28,7 @@ public class Response<T> {
     /** Callback interface for delivering parsed responses. */
     public interface Listener<T> {
         /** Called when a response is received. */
-        public void onResponse(T response, int token);
+        public void onResponse(T response, String token);
     }
 
     /** Callback interface for delivering error responses. */
