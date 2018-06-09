@@ -91,7 +91,7 @@ public class DoorApplication extends Application implements InstructionListener 
         String fileAddress = null;//文件地址
         String guid = null;//设备唯一标识符;
         String device_type = null;//设备类型
-        String operate_type = null;//开门类型
+        int operate_type = 0;//开门类型
         String objectkey = null;//访客留影地址
         long time = 0L;//门禁机时间
         String content = null;//透传字段，具体依据 operate_type 而定，值为urlencode后的字符串
@@ -101,7 +101,7 @@ public class DoorApplication extends Application implements InstructionListener 
 
 
         //开门操作完成后需要上报访客留影记录,上传成功返回true，失败返回false 请重传一次
-        boolean isUpload = DoorDuSDK.uploadVideoOrPicture(fileType, fileName, fileAddress, guid, device_type, openDoorType, objectkey, time, content, room_id, reason, open_time);
+        boolean isUpload = DoorDuSDK.uploadVideoOrPicture(fileType, fileName, fileAddress, guid, device_type, operate_type, objectkey, time, content, room_id, reason, open_time);
         return new ResultBean();
     }
 
@@ -111,10 +111,11 @@ public class DoorApplication extends Application implements InstructionListener 
      * @return
      */
     @Override
-    public List<CardInfo<Floor>> getBlackAndWhiteList() {
+    public  ResultBean getBlackAndWhiteList(List<CardInfo<Floor>> cardInfos ) {
         //获取卡信息 信息获取后保存导数据，刷卡卡门时用到，由于以后黑白名单会有很多，这里会做分页处理，
-        List<CardInfo<Floor>> cardInfos = DoorDuSDK.getCardInfo("DDD4001708-05946", 0, null);
-        return cardInfos;
+
+
+        return new ResultBean();
     }
 
     /**

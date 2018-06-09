@@ -1,5 +1,7 @@
 package com.doordu.doorsdk.netbean;
 
+import com.google.mgson.annotations.SerializedName;
+
 import java.util.List;
 
 /**
@@ -13,8 +15,8 @@ import java.util.List;
  */
 
 public class CardInfo<T> {
-  //  @SerializedName("isAll")
+    @SerializedName("isAll")
     private boolean isAll;
-   // @SerializedName("record")
+    @SerializedName("record")
     private List<T> mInfo;
 }

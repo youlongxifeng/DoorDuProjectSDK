@@ -3,6 +3,8 @@ package com.doordu.doorsdk.netbean;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 
+import com.google.mgson.annotations.SerializedName;
+
 /**
  * @author Administrator
  * @name DoorDuProjectSDK
@@ -15,17 +17,17 @@ import android.text.TextUtils;
  */
 
 public class Floor implements Comparable<Floor> {
-  //  @SerializedName("door_card_no")
+   @SerializedName("door_card_no")
     private String mCard;
-  //  @SerializedName("floor_no")
+     @SerializedName("floor_no")
     private String mFloor;
-   // @SerializedName("status")
+     @SerializedName("status")
     private int mStatus;
-   // @SerializedName("id")
+     @SerializedName("id")
     private long mId;
-  //  @SerializedName("expire")
+     @SerializedName("expire")
     private String mExpire;
-  //  @SerializedName("card_type")
+    @SerializedName("card_type")
     private int cardType;
 
     @Override

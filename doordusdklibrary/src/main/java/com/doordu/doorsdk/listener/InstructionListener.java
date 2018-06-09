@@ -47,10 +47,13 @@ public interface InstructionListener {
 
 
 
+
     /**
      * 拉取黑白名单指令  处理配置更新指令，上报给应用层，告知可更新本地刷卡数据
+     * @param cardInfos 当前
+     * @return
      */
-    List<CardInfo<Floor>> getBlackAndWhiteList();
+    ResultBean getBlackAndWhiteList(List<CardInfo<Floor>> cardInfos);
 
     /**
      * 网络密码指令    处理密码指令，并上报给应用层，等待应用层返回接收结果，回包给ddconnector
